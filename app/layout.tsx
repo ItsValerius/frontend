@@ -1,7 +1,7 @@
 import localFont from '@next/font/local';
-
+import "./globals.css"
 // Font files can be colocated inside of `app`
-const myFont = localFont({ src: '../public/robotocondensed-regular-webfont.woff2' });
+const myFont = localFont({ src: './my-font.woff2' });
 
 
 export default function RootLayout({
@@ -10,9 +10,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html className={myFont.className}>
+    <html className={`${myFont.className} h-full w-full`}>
       <head></head>
-      <body>{children}</body>
+      <body className='h-full w-full'>{children}</body>
     </html>
   )
 }
