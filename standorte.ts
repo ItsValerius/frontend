@@ -2,7 +2,7 @@
 const standorte = [
     {
         NAME: "Leipzig",
-        SHN: Number("147130000000"),
+        SHN: "147130000000",
         ZIP: [
             "04275",
             "04347",
@@ -44,7 +44,7 @@ const standorte = [
     },
     {
         NAME: "Aachen",
-        SHN: Number("053340002002"),
+        SHN: "053340002002",
         ZIP: [
             "52477",
             "52159",
