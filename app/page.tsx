@@ -4,6 +4,7 @@ import Warnmeldung from "../components/Warnmeldung";
 import db from "../lib/db";
 import { dbSignin } from "../lib/db";
 import standorte from "../standorte";
+import { dbAlert } from "../types/dbAlert";
 import { Alert } from "../types/XML";
 
 const getData = async (zipcode: string, latlong: string) => {
@@ -13,47 +14,17 @@ const getData = async (zipcode: string, latlong: string) => {
     });
     await dbSignin();
     if (standort) {
-      const alertsBySHN: {
-        result: {
-          Alert: Alert;
-          id: string;
-          geoJson: {};
-          SHN: string[];
-          ZIP_DE: string[];
-          expired: boolean;
-        }[];
-      }[] = await db.query("SELECT * FROM alert WHERE $SHN INSIDE SHN", {
-        SHN: standort.SHN,
-      });
 
-      const alertsByZIP: {
-        result: {
-          Alert: Alert;
-          id: string;
-          geoJson: {};
-          SHN: string[];
-          ZIP_DE: string[];
-          expired: boolean;
-        }[];
+      const alerts: {
+        result: dbAlert[];
       }[] = await db.query(
-        "SELECT * FROM alert WHERE $ZIP INSIDE alert.info.area.geocode.value",
-        { ZIP: zipcode }
+        `SELECT * FROM alert WHERE ((${latlong}) INSIDE geoJson OR $SHN INSIDE SHN OR $ZIP INSIDE ZIP_DE) AND expired = false ORDER BY severity DESC;`, { SHN: standort.SHN, ZIP: zipcode }
       );
 
-      const alertsByGEO: {
-        result: {
-          Alert: Alert;
-          id: string;
-          geoJson: {};
-          SHN: string[];
-          ZIP_DE: string[];
-          expired: boolean;
-        }[];
-      }[] = await db.query(
-        `SELECT * FROM alert WHERE (${latlong}) INSIDE geoJson`,
-      );
+      console.log(...alerts);
 
-      return [...alertsByGEO, ...alertsBySHN, ...alertsByZIP].filter(
+
+      return alerts.filter(
         (queries) => queries.result.length > 0
       );
     }
@@ -69,9 +40,10 @@ export default async function Page({
 }) {
   const data = await getData(searchParams.zipcode, searchParams.latlong);
 
-  if (data && data.length > 0) {
-    return <div>{data[0].result[0].id}</div>;
+  if (data && Array.isArray(data) && data.length > 0) {
+    return <div>array: {data[0].result[0].id}</div>;
   }
+
 
   return notFound();
 }
